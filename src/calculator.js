@@ -34,12 +34,18 @@ export const MODELS = {
   }
 };
 
-export function calculateCosts({ repoTokens, issuesCount = 100, turnsPerIssue = 4 }) {
-  // Realistic SWE agent assumptions per issue:
-  // Avg input per turn = 40% cached repo context + issue description + history
-  // Avg output per turn = 3,500 tokens (chain of thought reasoning + git diff)
-  const inputTokensPerIssue = repoTokens * 0.4 * turnsPerIssue;
-  const outputTokensPerIssue = 3500 * turnsPerIssue;
+export function calculateCosts({ 
+  repoTokens, 
+  issuesCount = 100, 
+  turnsPerIssue = 4,
+  cachedRatio = 0.4,
+  outputTokensPerTurn = 3500
+}) {
+  // Configurable SWE agent assumptions:
+  // Input tokens per issue = context tokens * cache factor * turns
+  // Output tokens per issue = tokens per turn * turns
+  const inputTokensPerIssue = repoTokens * cachedRatio * turnsPerIssue;
+  const outputTokensPerIssue = outputTokensPerTurn * turnsPerIssue;
 
   const results = [];
 

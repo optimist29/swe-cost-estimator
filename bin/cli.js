@@ -13,26 +13,79 @@ const DIM = "\x1b[2m";
 const RESET = "\x1b[0m";
 
 const args = process.argv.slice(2);
+
+if (args.includes("--help") || args.includes("-h")) {
+  console.log(`
+${BOLD}${CYAN}⚡ swe-cost-estimator (DeepSWE v1.1)${RESET}
+
+Estimate multi-turn SWE agent costs and effective cost-per-resolved-issue across frontier AI models.
+
+${BOLD}USAGE:${RESET}
+  npx swe-cost-estimator [path] [options]
+
+${BOLD}OPTIONS:${RESET}
+  [path]                 Target repository to scan (default: current working directory)
+  --issues <number>      Number of tasks/issues to simulate (default: 100)
+  --turns <number>       Average agent turns/iterations per issue (default: 4)
+  --cache-ratio <float>  Fraction of codebase context ingested per turn (default: 0.4)
+  --output-tokens <num>  Output tokens per turn for reasoning + git diff (default: 3500)
+  --json                 Output raw JSON data for CI/CD or scripting
+  -h, --help             Show this help message
+
+${BOLD}EXAMPLES:${RESET}
+  npx swe-cost-estimator
+  npx swe-cost-estimator ./my-app --issues 250
+  npx swe-cost-estimator . --issues 50 --turns 6
+  npx swe-cost-estimator . --json | jq .
+`);
+  process.exit(0);
+}
+
 const targetDir = args[0] && !args[0].startsWith("-") ? path.resolve(args[0]) : process.cwd();
 
-let issuesCount = 100;
-const issuesIndex = args.indexOf("--issues");
-if (issuesIndex !== -1 && args[issuesIndex + 1]) {
-  issuesCount = parseInt(args[issuesIndex + 1], 10);
+function getArg(flag, fallback) {
+  const idx = args.indexOf(flag);
+  return (idx !== -1 && args[idx + 1]) ? args[idx + 1] : fallback;
+}
+
+const issuesCount = parseInt(getArg("--issues", "100"), 10);
+const turnsPerIssue = parseInt(getArg("--turns", "4"), 10);
+const cachedRatio = parseFloat(getArg("--cache-ratio", "0.4"));
+const outputTokensPerTurn = parseInt(getArg("--output-tokens", "3500"), 10);
+const isJson = args.includes("--json");
+
+const { fileCount, estimatedTokens } = scanRepositoryTokens(targetDir);
+const repoTokens = estimatedTokens > 5000 ? estimatedTokens : 120_000;
+
+const results = calculateCosts({ 
+  repoTokens, 
+  issuesCount, 
+  turnsPerIssue, 
+  cachedRatio, 
+  outputTokensPerTurn 
+});
+
+if (isJson) {
+  console.log(JSON.stringify({
+    metadata: {
+      targetDir,
+      fileCount,
+      repoTokens,
+      issuesCount,
+      turnsPerIssue,
+      cachedRatio,
+      outputTokensPerTurn,
+      benchmark: "DeepSWE v1.1"
+    },
+    models: results
+  }, null, 2));
+  process.exit(0);
 }
 
 console.log(`\n${BOLD}${CYAN}⚡ SWE Cost & Agent Efficiency Estimator (DeepSWE v1.1)${RESET}\n`);
 console.log(`${DIM}Scanning repository context: ${targetDir}...${RESET}`);
-
-const { fileCount, estimatedTokens } = scanRepositoryTokens(targetDir);
-
-// Fallback baseline tokens if scanning an empty directory
-const repoTokens = estimatedTokens > 5000 ? estimatedTokens : 120_000;
-
 console.log(`${GREEN}✔${RESET} Analyzed ${BOLD}${fileCount}${RESET} code files (~${BOLD}${repoTokens.toLocaleString()}${RESET} tokens of repository context).`);
-console.log(`${DIM}Simulating workload: ${BOLD}${issuesCount}${DIM} software engineering tasks (4 agent turns/issue)...\n${RESET}`);
-
-const results = calculateCosts({ repoTokens, issuesCount });
+console.log(`${DIM}Simulating workload: ${BOLD}${issuesCount}${DIM} issues (${BOLD}${turnsPerIssue}${DIM} agent turns/issue, ${BOLD}${Math.round(cachedRatio*100)}%${DIM} context cached)...\n${RESET}`);
 
 console.log("-----------------------------------------------------------------------------------------");
 console.log(`| Model               | DeepSWE v1.1 | Est. Solved | Total Cost  | Cost / Solved Issue     |`);

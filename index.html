@@ -26,52 +26,78 @@
       </div>
     </div>
 
-    <!-- Sliders / Controls Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+    <!-- Sliders / Controls Grid (4 Controls) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       
       <!-- Control 1: Issues Count -->
-      <div class="p-4 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-        <div class="flex justify-between items-center mb-2">
-          <label class="text-xs font-semibold text-[var(--foreground)] uppercase tracking-wider">GitHub Issues / Tasks</label>
-          <span id="issues-val" class="font-mono text-sm font-bold text-blue-500">100 issues</span>
+      <div class="p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+        <div class="flex justify-between items-center mb-1.5">
+          <label class="text-[11px] font-semibold text-[var(--foreground)] uppercase tracking-wider">Issues / Tasks</label>
+          <span id="issues-val" class="font-mono text-xs font-bold text-blue-500">100</span>
         </div>
         <input type="range" id="issues-slider" min="10" max="500" step="10" value="100"
-          class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
-        <div class="flex justify-between text-[10px] text-[var(--muted-foreground)] mt-1.5">
-          <span>10 (Sprint)</span>
-          <span>100 (Quarterly)</span>
-          <span>500 (Enterprise)</span>
+          class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+        <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-1">
+          <span>10</span>
+          <span>500</span>
         </div>
       </div>
 
       <!-- Control 2: Repo Context Size -->
-      <div class="p-4 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-        <div class="flex justify-between items-center mb-2">
-          <label class="text-xs font-semibold text-[var(--foreground)] uppercase tracking-wider">Repository Context Size</label>
-          <span id="tokens-val" class="font-mono text-sm font-bold text-blue-500">120,000 tokens</span>
+      <div class="p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+        <div class="flex justify-between items-center mb-1.5">
+          <label class="text-[11px] font-semibold text-[var(--foreground)] uppercase tracking-wider">Repo Context</label>
+          <span id="tokens-val" class="font-mono text-xs font-bold text-blue-500">120k</span>
         </div>
         <input type="range" id="tokens-slider" min="30000" max="400000" step="10000" value="120000"
-          class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
-        <div class="flex justify-between text-[10px] text-[var(--muted-foreground)] mt-1.5">
-          <span>30k (Small Lib)</span>
-          <span>120k (Mid Service)</span>
-          <span>400k (Large Monorepo)</span>
+          class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+        <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-1">
+          <span>30k</span>
+          <span>400k</span>
+        </div>
+      </div>
+
+      <!-- Control 3: Agent Turns per Issue -->
+      <div class="p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+        <div class="flex justify-between items-center mb-1.5">
+          <label class="text-[11px] font-semibold text-[var(--foreground)] uppercase tracking-wider">Turns / Issue</label>
+          <span id="turns-val" class="font-mono text-xs font-bold text-blue-500">4 turns</span>
+        </div>
+        <input type="range" id="turns-slider" min="1" max="10" step="1" value="4"
+          class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+        <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-1">
+          <span>1 turn</span>
+          <span>10 turns</span>
+        </div>
+      </div>
+
+      <!-- Control 4: Context Cache Factor -->
+      <div class="p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+        <div class="flex justify-between items-center mb-1.5">
+          <label class="text-[11px] font-semibold text-[var(--foreground)] uppercase tracking-wider">Context Cached</label>
+          <span id="cache-val" class="font-mono text-xs font-bold text-blue-500">40%</span>
+        </div>
+        <input type="range" id="cache-slider" min="10" max="90" step="5" value="40"
+          class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+        <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-1">
+          <span>10%</span>
+          <span>90%</span>
         </div>
       </div>
 
     </div>
 
-    <!-- Live Results Table & Bar Visualizer -->
+    <!-- Live Results Table -->
     <div class="overflow-x-auto mb-6">
       <table class="w-full text-left text-sm border-collapse">
         <thead>
           <tr class="border-b border-[var(--border)] text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">
             <th class="py-2.5 px-3">Model</th>
             <th class="py-2.5 px-3 text-center">DeepSWE v1.1</th>
-            <th class="py-2.5 px-3 text-center">Expected Solved</th>
+            <th class="py-2.5 px-3 text-center">Est. Solved</th>
             <th class="py-2.5 px-3 text-right">Total Cost</th>
             <th class="py-2.5 px-3 text-right">Cost / Solved Bug</th>
-            <th class="py-2.5 px-3 text-center">Cost Comparison</th>
+            <th class="py-2.5 px-3 text-center">Relative Cost</th>
           </tr>
         </thead>
         <tbody id="table-body" class="divide-y divide-[var(--border)]">
@@ -96,13 +122,13 @@
       </div>
     </div>
 
-    <!-- Terminal Command snippet box -->
+    <!-- Terminal Command snippet box with dynamic flags -->
     <div class="mt-5 pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--muted-foreground)]">
       <div class="flex items-center gap-2">
-        <span class="font-mono bg-[var(--background)] px-2.5 py-1.5 rounded-lg border border-[var(--border)] text-[var(--foreground)] select-all">
-          npx swe-cost-estimator . --issues <span id="cmd-issues">100</span>
+        <span id="cmd-snippet" class="font-mono bg-[var(--background)] px-2.5 py-1.5 rounded-lg border border-[var(--border)] text-[var(--foreground)] select-all text-[11px]">
+          npx swe-cost-estimator . --issues 100 --turns 4
         </span>
-        <span class="hidden sm:inline">Run against your local codebase</span>
+        <span class="hidden sm:inline">Run against local repo</span>
       </div>
       <div class="flex items-center gap-3 font-medium text-[11px]">
         <a href="https://github.com/optimist29/swe-cost-estimator" target="_blank" class="hover:text-blue-500 transition-colors">GitHub Repo ↗</a>
@@ -149,23 +175,34 @@
 
     const issuesSlider = document.getElementById('issues-slider');
     const tokensSlider = document.getElementById('tokens-slider');
+    const turnsSlider = document.getElementById('turns-slider');
+    const cacheSlider = document.getElementById('cache-slider');
+
     const issuesVal = document.getElementById('issues-val');
     const tokensVal = document.getElementById('tokens-val');
+    const turnsVal = document.getElementById('turns-val');
+    const cacheVal = document.getElementById('cache-val');
+
     const tableBody = document.getElementById('table-body');
     const summaryText = document.getElementById('summary-text');
     const savingsPct = document.getElementById('savings-pct');
-    const cmdIssues = document.getElementById('cmd-issues');
+    const cmdSnippet = document.getElementById('cmd-snippet');
 
     function update() {
       const issues = parseInt(issuesSlider.value, 10);
       const repoTokens = parseInt(tokensSlider.value, 10);
+      const turns = parseInt(turnsSlider.value, 10);
+      const cacheRatio = parseInt(cacheSlider.value, 10) / 100;
 
-      issuesVal.textContent = `${issues} issues`;
-      tokensVal.textContent = `${repoTokens.toLocaleString()} tokens`;
-      cmdIssues.textContent = issues;
+      issuesVal.textContent = issues;
+      tokensVal.textContent = (repoTokens / 1000) + 'k';
+      turnsVal.textContent = `${turns} turns`;
+      cacheVal.textContent = `${Math.round(cacheRatio * 100)}%`;
 
-      const inputTokensPerIssue = repoTokens * 0.4 * 4;
-      const outputTokensPerIssue = 3500 * 4;
+      cmdSnippet.textContent = `npx swe-cost-estimator . --issues ${issues} --turns ${turns}`;
+
+      const inputTokensPerIssue = repoTokens * cacheRatio * turns;
+      const outputTokensPerIssue = 3500 * turns;
 
       const rows = MODELS.map(model => {
         const inCost = (inputTokensPerIssue * issues / 1_000_000) * model.inputPrice;
@@ -181,17 +218,14 @@
         };
       });
 
-      // Find Opus for relative comparison
       const opus = rows.find(r => r.id === 'claude-opus-5');
       const gemini = rows.find(r => r.id === 'gemini-3.8-flash');
 
-      // Sort by lowest effective cost
       rows.sort((a, b) => a.effectiveCost - b.effectiveCost);
 
       tableBody.innerHTML = rows.map(r => {
         const isLeader = r.isGemini;
         const barWidth = Math.min(100, Math.round((r.effectiveCost / opus.effectiveCost) * 100));
-        const diffFromOpus = Math.round(((r.effectiveCost - gemini.effectiveCost) / gemini.effectiveCost) * 100);
 
         return `
           <tr class="${isLeader ? 'bg-blue-500/5 font-medium' : ''}">
@@ -214,8 +248,8 @@
               $${r.effectiveCost.toFixed(2)}
             </td>
             <td class="py-3 px-3 text-center">
-              <div class="w-24 bg-neutral-200 dark:bg-neutral-800 rounded-full h-2 mx-auto overflow-hidden">
-                <div class="${isLeader ? 'bg-emerald-500' : 'bg-neutral-400 dark:bg-neutral-600'} h-2 rounded-full" style="width: ${barWidth}%"></div>
+              <div class="w-20 bg-neutral-200 dark:bg-neutral-800 rounded-full h-1.5 mx-auto overflow-hidden">
+                <div class="${isLeader ? 'bg-emerald-500' : 'bg-neutral-400 dark:bg-neutral-600'} h-1.5 rounded-full" style="width: ${barWidth}%"></div>
               </div>
               <div class="text-[9px] text-[var(--muted-foreground)] mt-1">
                 ${isLeader ? 'Baseline' : `${(r.effectiveCost / gemini.effectiveCost).toFixed(1)}x cost`}
@@ -231,12 +265,14 @@
       summaryText.innerHTML = `
         Gemini 3.8 Flash delivers <strong>73.7% DeepSWE v1.1 accuracy</strong> (beating Claude Opus 5's 68.8%), 
         while cutting total SWE agent cost from <strong class="text-amber-500">$${opus.total.toFixed(2)}</strong> 
-        down to <strong class="text-emerald-500">$${gemini.total.toFixed(2)}</strong> across ${issues} issues.
+        down to <strong class="text-emerald-500">$${gemini.total.toFixed(2)}</strong> across ${issues} tasks.
       `;
     }
 
     issuesSlider.addEventListener('input', update);
     tokensSlider.addEventListener('input', update);
+    turnsSlider.addEventListener('input', update);
+    cacheSlider.addEventListener('input', update);
     update();
   </script>
 </body>

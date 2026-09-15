@@ -6,6 +6,7 @@ Zero-dependency Python CLI tool.
 
 import os
 import sys
+import json
 import argparse
 
 MODELS = {
@@ -70,17 +71,17 @@ def scan_repo(directory):
 def main():
     parser = argparse.ArgumentParser(description="Estimate SWE agent costs and effective cost per solved bug.")
     parser.add_argument("path", nargs="?", default=".", help="Target repository path")
-    parser.add_argument("--issues", type=int, default=100, help="Number of SWE issues to simulate (default: 100)")
+    parser.add_argument("--issues", type=int, default=100, help="Number of tasks/issues to simulate (default: 100)")
+    parser.add_argument("--turns", type=int, default=4, help="Average agent turns/iterations per issue (default: 4)")
+    parser.add_argument("--cache-ratio", type=float, default=0.4, help="Context cache ratio per turn (default: 0.4)")
+    parser.add_argument("--output-tokens", type=int, default=3500, help="Output tokens per turn (default: 3500)")
+    parser.add_argument("--json", action="store_true", help="Output raw JSON data")
     args = parser.parse_args()
 
     files, tokens = scan_repo(args.path)
 
-    print(f"\n\033[1m\033[36m⚡ SWE Cost & Agent Efficiency Estimator (DeepSWE v1.1)\033[0m\n")
-    print(f"\033[32m✔\033[0m Scanned \033[1m{files}\033[0m code files (~{tokens:,} tokens of context).")
-    print(f"Simulating workload: \033[1m{args.issues}\033[0m software engineering tasks (4 agent turns/issue)...\n")
-
-    input_tokens = tokens * 0.4 * 4
-    output_tokens = 3500 * 4
+    input_tokens = tokens * args.cache_ratio * args.turns
+    output_tokens = args.output_tokens * args.turns
 
     rows = []
     for key, m in MODELS.items():
@@ -100,6 +101,27 @@ def main():
         })
 
     rows.sort(key=lambda r: r["eff"])
+
+    if args.json:
+        output_data = {
+            "metadata": {
+                "targetDir": os.path.abspath(args.path),
+                "fileCount": files,
+                "repoTokens": tokens,
+                "issuesCount": args.issues,
+                "turnsPerIssue": args.turns,
+                "cacheRatio": args.cache_ratio,
+                "outputTokensPerTurn": args.output_tokens,
+                "benchmark": "DeepSWE v1.1"
+            },
+            "models": rows
+        }
+        print(json.dumps(output_data, indent=2))
+        return
+
+    print(f"\n\033[1m\033[36m⚡ SWE Cost & Agent Efficiency Estimator (DeepSWE v1.1)\033[0m\n")
+    print(f"\033[32m✔\033[0m Scanned \033[1m{files}\033[0m code files (~{tokens:,} tokens of context).")
+    print(f"Simulating workload: \033[1m{args.issues}\033[0m issues (\033[1m{args.turns}\033[0m turns/issue, \033[1m{int(args.cache_ratio*100)}%\033[0m context cached)...\n")
 
     print("-----------------------------------------------------------------------------------------")
     print(f"| Model               | DeepSWE v1.1 | Est. Solved | Total Cost  | Cost / Solved Issue     |")
