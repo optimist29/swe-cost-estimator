@@ -26,62 +26,83 @@
       </div>
     </div>
 
+    <!-- 1-Click Presets Bar (Matt's Feedback) -->
+    <div class="mb-5 p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-[var(--foreground)]">Quick Presets:</span>
+          <span class="text-[11px] text-[var(--muted-foreground)] ml-1">Don't know the dials? Pick your team profile:</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2" id="preset-buttons">
+          <button type="button" data-preset="mvp" class="preset-btn px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--card)] hover:border-blue-500 transition-all active:scale-95">
+            📦 Small Service / MVP
+          </button>
+          <button type="button" data-preset="team" class="preset-btn active px-3 py-1 rounded-lg text-xs font-medium border border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold transition-all active:scale-95">
+            🚀 Active Team Repo
+          </button>
+          <button type="button" data-preset="enterprise" class="preset-btn px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--card)] hover:border-blue-500 transition-all active:scale-95">
+            🏢 Enterprise Monorepo
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Sliders / Controls Grid (4 Controls) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       
       <!-- Control 1: Issues Count -->
       <div class="p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-        <div class="flex justify-between items-center mb-1.5">
+        <div class="flex justify-between items-center mb-1">
           <label class="text-[11px] font-semibold text-[var(--foreground)] uppercase tracking-wider">Issues / Tasks</label>
           <span id="issues-val" class="font-mono text-xs font-bold text-blue-500">100</span>
         </div>
         <input type="range" id="issues-slider" min="10" max="500" step="10" value="100"
           class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
         <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-1">
-          <span>10</span>
-          <span>500</span>
+          <span>10 (Sprint)</span>
+          <span>500 (Quarter)</span>
         </div>
       </div>
 
       <!-- Control 2: Repo Context Size -->
       <div class="p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-        <div class="flex justify-between items-center mb-1.5">
+        <div class="flex justify-between items-center mb-1">
           <label class="text-[11px] font-semibold text-[var(--foreground)] uppercase tracking-wider">Repo Context</label>
           <span id="tokens-val" class="font-mono text-xs font-bold text-blue-500">120k</span>
         </div>
         <input type="range" id="tokens-slider" min="30000" max="400000" step="10000" value="120000"
           class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
         <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-1">
-          <span>30k</span>
-          <span>400k</span>
+          <span>30k (~10k LOC)</span>
+          <span>400k (~120k LOC)</span>
         </div>
       </div>
 
       <!-- Control 3: Agent Turns per Issue -->
       <div class="p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-        <div class="flex justify-between items-center mb-1.5">
+        <div class="flex justify-between items-center mb-1">
           <label class="text-[11px] font-semibold text-[var(--foreground)] uppercase tracking-wider">Turns / Issue</label>
-          <span id="turns-val" class="font-mono text-xs font-bold text-blue-500">4 turns</span>
+          <span id="turns-val" class="font-mono text-xs font-bold text-blue-500">5 turns</span>
         </div>
-        <input type="range" id="turns-slider" min="1" max="10" step="1" value="4"
+        <input type="range" id="turns-slider" min="1" max="10" step="1" value="5"
           class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
         <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-1">
-          <span>1 turn</span>
-          <span>10 turns</span>
+          <span>1 (Straightforward)</span>
+          <span>10 (High Churn)</span>
         </div>
       </div>
 
       <!-- Control 4: Context Cache Factor -->
       <div class="p-3.5 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-        <div class="flex justify-between items-center mb-1.5">
+        <div class="flex justify-between items-center mb-1">
           <label class="text-[11px] font-semibold text-[var(--foreground)] uppercase tracking-wider">Context Cached</label>
-          <span id="cache-val" class="font-mono text-xs font-bold text-blue-500">40%</span>
+          <span id="cache-val" class="font-mono text-xs font-bold text-blue-500">50%</span>
         </div>
-        <input type="range" id="cache-slider" min="10" max="90" step="5" value="40"
+        <input type="range" id="cache-slider" min="10" max="90" step="5" value="50"
           class="w-full h-1.5 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
         <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-1">
-          <span>10%</span>
-          <span>90%</span>
+          <span>10% (Low Cache)</span>
+          <span>90% (High Cache)</span>
         </div>
       </div>
 
@@ -126,9 +147,9 @@
     <div class="mt-5 pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--muted-foreground)]">
       <div class="flex items-center gap-2">
         <span id="cmd-snippet" class="font-mono bg-[var(--background)] px-2.5 py-1.5 rounded-lg border border-[var(--border)] text-[var(--foreground)] select-all text-[11px]">
-          npx swe-cost-estimator . --issues 100 --turns 4
+          npx swe-cost-estimator . --issues 100 --turns 5
         </span>
-        <span class="hidden sm:inline">Run against local repo</span>
+        <span class="hidden sm:inline">Run against local repo (zero dials needed)</span>
       </div>
       <div class="flex items-center gap-3 font-medium text-[11px]">
         <a href="https://github.com/optimist29/swe-cost-estimator" target="_blank" class="hover:text-blue-500 transition-colors">GitHub Repo ↗</a>
@@ -173,6 +194,12 @@
       }
     ];
 
+    const PRESETS = {
+      mvp: { issues: 25, tokens: 40000, turns: 3, cache: 40 },
+      team: { issues: 100, tokens: 120000, turns: 5, cache: 50 },
+      enterprise: { issues: 250, tokens: 350000, turns: 7, cache: 60 }
+    };
+
     const issuesSlider = document.getElementById('issues-slider');
     const tokensSlider = document.getElementById('tokens-slider');
     const turnsSlider = document.getElementById('turns-slider');
@@ -187,6 +214,28 @@
     const summaryText = document.getElementById('summary-text');
     const savingsPct = document.getElementById('savings-pct');
     const cmdSnippet = document.getElementById('cmd-snippet');
+
+    function applyPreset(key) {
+      const p = PRESETS[key];
+      if (!p) return;
+      issuesSlider.value = p.issues;
+      tokensSlider.value = p.tokens;
+      turnsSlider.value = p.turns;
+      cacheSlider.value = p.cache;
+
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        if (btn.dataset.preset === key) {
+          btn.className = 'preset-btn active px-3 py-1 rounded-lg text-xs font-semibold border border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 transition-all active:scale-95';
+        } else {
+          btn.className = 'preset-btn px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--card)] hover:border-blue-500 transition-all active:scale-95';
+        }
+      });
+      update();
+    }
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
 
     function update() {
       const issues = parseInt(issuesSlider.value, 10);

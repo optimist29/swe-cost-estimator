@@ -9,6 +9,7 @@ const BOLD = "\x1b[1m";
 const GREEN = "\x1b[32m";
 const CYAN = "\x1b[36m";
 const YELLOW = "\x1b[33m";
+const MAGENTA = "\x1b[35m";
 const DIM = "\x1b[2m";
 const RESET = "\x1b[0m";
 
@@ -26,9 +27,11 @@ ${BOLD}USAGE:${RESET}
 ${BOLD}OPTIONS:${RESET}
   [path]                 Target repository to scan (default: current working directory)
   --issues <number>      Number of tasks/issues to simulate (default: 100)
-  --turns <number>       Average agent turns/iterations per issue (default: 4)
+  --turns <number>       Average agent turns/iterations per issue (default: auto-detected or 4)
+  --rebase-factor <num>  Override team git churn rebase multiplier (e.g. 1.3 for +30% rework)
   --cache-ratio <float>  Fraction of codebase context ingested per turn (default: 0.4)
   --output-tokens <num>  Output tokens per turn for reasoning + git diff (default: 3500)
+  --no-churn             Disable automatic Git velocity / rebase contention detection
   --json                 Output raw JSON data for CI/CD or scripting
   -h, --help             Show this help message
 
@@ -36,6 +39,7 @@ ${BOLD}EXAMPLES:${RESET}
   npx swe-cost-estimator
   npx swe-cost-estimator ./my-app --issues 250
   npx swe-cost-estimator . --issues 50 --turns 6
+  npx swe-cost-estimator . --rebase-factor 1.5
   npx swe-cost-estimator . --json | jq .
 `);
   process.exit(0);
@@ -49,18 +53,40 @@ function getArg(flag, fallback) {
 }
 
 const issuesCount = parseInt(getArg("--issues", "100"), 10);
-const turnsPerIssue = parseInt(getArg("--turns", "4"), 10);
 const cachedRatio = parseFloat(getArg("--cache-ratio", "0.4"));
 const outputTokensPerTurn = parseInt(getArg("--output-tokens", "3500"), 10);
 const isJson = args.includes("--json");
+const disableChurn = args.includes("--no-churn");
 
-const { fileCount, estimatedTokens } = scanRepositoryTokens(targetDir);
+const { fileCount, estimatedTokens, gitVelocity, localAgentData } = scanRepositoryTokens(targetDir);
 const repoTokens = estimatedTokens > 5000 ? estimatedTokens : 120_000;
+
+// Determine baseline turns
+let turnsPerIssue = 4;
+const explicitTurns = getArg("--turns", null);
+
+if (explicitTurns) {
+  turnsPerIssue = parseInt(explicitTurns, 10);
+} else if (localAgentData && localAgentData.detected && localAgentData.avgTurns) {
+  turnsPerIssue = Math.round(localAgentData.avgTurns);
+}
+
+// Apply Sathish's "Git Churn & Rebase Contention Multiplier"
+let rebaseMultiplier = 1.0;
+const explicitRebase = getArg("--rebase-factor", null);
+
+if (explicitRebase) {
+  rebaseMultiplier = parseFloat(explicitRebase);
+} else if (!disableChurn && gitVelocity && gitVelocity.reworkMultiplier > 1.0) {
+  rebaseMultiplier = gitVelocity.reworkMultiplier;
+}
+
+const effectiveTurns = Math.round(turnsPerIssue * rebaseMultiplier);
 
 const results = calculateCosts({ 
   repoTokens, 
   issuesCount, 
-  turnsPerIssue, 
+  turnsPerIssue: effectiveTurns, 
   cachedRatio, 
   outputTokensPerTurn 
 });
@@ -72,7 +98,11 @@ if (isJson) {
       fileCount,
       repoTokens,
       issuesCount,
-      turnsPerIssue,
+      baseTurns: turnsPerIssue,
+      effectiveTurns,
+      rebaseMultiplier,
+      gitVelocity,
+      localAgentData,
       cachedRatio,
       outputTokensPerTurn,
       benchmark: "DeepSWE v1.1"
@@ -85,7 +115,20 @@ if (isJson) {
 console.log(`\n${BOLD}${CYAN}⚡ SWE Cost & Agent Efficiency Estimator (DeepSWE v1.1)${RESET}\n`);
 console.log(`${DIM}Scanning repository context: ${targetDir}...${RESET}`);
 console.log(`${GREEN}✔${RESET} Analyzed ${BOLD}${fileCount}${RESET} code files (~${BOLD}${repoTokens.toLocaleString()}${RESET} tokens of repository context).`);
-console.log(`${DIM}Simulating workload: ${BOLD}${issuesCount}${DIM} issues (${BOLD}${turnsPerIssue}${DIM} agent turns/issue, ${BOLD}${Math.round(cachedRatio*100)}%${DIM} context cached)...\n${RESET}`);
+
+if (gitVelocity && gitVelocity.commitsLast14Days > 0) {
+  const churnColor = gitVelocity.churnLevel === "High" ? YELLOW : CYAN;
+  console.log(`${churnColor}⚡ Team Git Churn:${RESET} ${gitVelocity.commitsLast14Days} commits in last 14d (${gitVelocity.churnLevel} velocity).`);
+  if (rebaseMultiplier > 1.0) {
+    console.log(`   ${DIM}↳ Applied ${BOLD}${rebaseMultiplier}x${RESET}${DIM} Rebase Contention Factor (accounts for merge conflict rework).${RESET}`);
+  }
+}
+
+if (localAgentData && localAgentData.detected) {
+  console.log(`${MAGENTA}🔍 Local Agent History:${RESET} Detected ${localAgentData.name} session logs.`);
+}
+
+console.log(`${DIM}Simulating workload: ${BOLD}${issuesCount}${DIM} issues (${BOLD}${effectiveTurns}${DIM} effective turns/issue with rebase factor, ${BOLD}${Math.round(cachedRatio*100)}%${DIM} context cached)...\n${RESET}`);
 
 console.log("-----------------------------------------------------------------------------------------");
 console.log(`| Model               | DeepSWE v1.1 | Est. Solved | Total Cost  | Cost / Solved Issue     |`);
