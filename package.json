@@ -1,7 +1,11 @@
 {
   "name": "swe-cost-estimator",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Calculate inference costs and effective cost-per-resolved-issue across AI models for autonomous SWE agents.",
+  "scripts": {
+    "experiment": "node scripts/run_experiment.js",
+    "test": "node --test sample-task/test.js"
+  },
   "bin": {
     "swe-cost-estimator": "bin/cli.js"
   },

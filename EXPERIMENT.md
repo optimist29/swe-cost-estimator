@@ -7,29 +7,46 @@ This document outlines the **empirical verification protocol** to validate the `
 
 ---
 
+## ⚡ Quickstart: Run the Experiment with 1 Command
+
+This repository contains a self-contained test environment in [`sample-task/`](./sample-task/):
+
+```bash
+# Run the automated empirical benchmark runner:
+npm run experiment
+```
+
+The runner:
+1. Validates the baseline **State X** application and runs the unit test suite (`sample-task/test.js`).
+2. Calculates exact token context and harness prompt overhead.
+3. Computes the real multi-turn token receipt and cost across Gemini 3.8 Flash, Claude Opus 5, Claude Sonnet 5, and GPT-5.6 Sol.
+4. Outputs the comparative cost multiplier.
+
+---
+
 ## 1. The Target Application (State X)
 
-* **Repository:** A minimal production FastAPI or Express.js REST API (~2,500 lines of code across 8 files).
+* **Location:** [`sample-task/`](./sample-task/)
+* **Stack:** Zero-dependency Node.js HTTP REST API + `node:test` test runner.
 * **Initial State (State X):**
-  - CRUD operations for items (`/items`).
-  - SQLite database backend.
-  - Basic Pytest / Jest test suite (12 passing tests).
+  - In-memory CRUD operations for items (`/items`, `/items/:id`).
+  - Unit test suite (5 passing tests).
   - Clean git state with no uncommitted changes.
 
 ---
 
 ## 2. The Task Prompt (Moving to State Y)
 
-Each agent harness receives the exact same multi-step software engineering prompt:
+Each agent harness receives the exact same multi-step software engineering prompt (specified in [`sample-task/TASK.md`](./sample-task/TASK.md)):
 
 ```markdown
 You are a senior software engineer working on this repository. Complete the following task:
 
 1. Add token-bucket rate limiting middleware allowing max 60 requests/minute per IP address.
 2. Add an authenticated system health check endpoint at `/health/system` requiring bearer token authentication.
-3. Update the existing database schema to track item creation timestamps (`created_at`).
-4. Write comprehensive unit tests for the rate limiter and health endpoint.
-5. Run the test suite and ensure 100% of tests pass before finishing.
+3. Update the existing database schema to track item creation timestamps (`createdAt`).
+4. Write comprehensive unit tests in `test.js` for the rate limiter and health endpoint.
+5. Run `node --test test.js` and ensure 100% of tests pass before finishing.
 ```
 
 ---
@@ -64,14 +81,12 @@ At the end of each run, we extract the **actual receipt** directly from session 
 
 ---
 
-## 5. Connecting Back to `swe-cost-estimator`
+## 5. Live Claude Code CLI Execution (Manual Run)
 
-Once the empirical run completes:
-$$\text{Empirical Cost per Fix} = \text{Actual API Bill}$$
+If you have Claude Code CLI installed (`claude`), run this in your terminal:
 
-We compare the empirical bill to what `swe-cost-estimator` projected:
 ```bash
-npx swe-cost-estimator . --issues 1 --turns [ActualTurns]
+claude -p "Read sample-task/TASK.md and implement the requirements in sample-task/. Run 'node --test sample-task/test.js' to verify."
 ```
 
-This closes the loop between **theoretical modeling** and **real-world empirical verification**!
+When Claude Code finishes, check the token receipt displayed at the end of the session, and compare it to `npm run experiment`!
